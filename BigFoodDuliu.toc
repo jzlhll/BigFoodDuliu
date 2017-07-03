@@ -1,0 +1,16 @@
+## Interface: 70200
+## Title: BigFoodDuliu.Find out the raid member who eat too many food.
+## Title-zhTW: 大餐毒瘤。找出團隊吃大餐的時候，點擊過多的毒瘤玩家。
+## Title-zhCN: 大餐毒瘤。找出团队吃大餐的时候，点击过多的毒瘤选手。
+## Author: Allan
+## Version: 7.2.5.20170703
+## Notes: BigFoodDuliu
+## Notes-zhTW: 大餐毒瘤
+## Notes-zhCN: 大餐毒瘤
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariables: BFD_foodId, BFD_Enable,BFD_foodBuffId
+localization-zhCN.lua
+localization-enUS.lua
+localization-zhTW.lua
+BigFoodDuliu.lua
