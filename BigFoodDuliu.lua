@@ -8,17 +8,21 @@ local GetNamePlateForUnit = C_NamePlate.GetNamePlateForUnit
 local GetNamePlates = C_NamePlate.GetNamePlates
 local UnitName, GetUnitName = UnitName, GetUnitName
 
-----参数配置flag
-local EAT_MAX_TIME = 20
+----参数配置-----
+local DEBUG_MORE = false
 
-local EAT_TO_BUFF_TIME = 10
+local EAT_MAX_TIME = 20 --- 食物倒计时最大 秒
 
-local HALF_TOTAL_BUFF_TIME = 30
+local EAT_TO_BUFF_TIME = 10  --- 食物吃出buff需要的时间 秒
 
+local HALF_TOTAL_BUFF_TIME = 30 --- 食物BUFF大于这个分钟，就表示吃了还TM吃
 
-local FOOD_EAT_ID = 225743
+--吃食物的ID
+local FOOD_EAT_ID = 225743 --法罗纳尔气泡酒的ID。 大餐吃的ID忘记了。 
 
-local FOOD_BUF_ID0 = 201334 -- 201638
+-- 食物buFF的ID，由于大餐有4个职业的bUFF，所以预留4个
+-- 备注的是大餐的4个职业的BUFF ID 当前是法罗纳尔气泡酒的ID
+local FOOD_BUF_ID0 = 201334 -- 201638 
 local FOOD_BUF_ID1 = 201334 -- 201641
 local FOOD_BUF_ID2 = 201334 -- 201639
 local FOOD_BUF_ID3 = 201334 -- 201640
@@ -65,12 +69,12 @@ function BigFoodDuliu:PLAYER_ENTERING_WORLD()
 end
 
 function BigFoodDuliu:PLAYER_REGEN_ENABLED()
-	--print("停止!")
+	if DEBUG_MORE then print("停止!停止监控。") end
 	if BFD_Enable then BigFoodDuliu:RegisterEvent("UNIT_AURA") end
 end
 
 function BigFoodDuliu:PLAYER_REGEN_DISABLED()
-	--print("战斗!")
+	if DEBUG_MORE then print("战斗!开始监控。") end
 	BigFoodDuliu:UnregisterEvent("UNIT_AURA")
 	AInfoList = {}
 end
@@ -142,12 +146,11 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 					local tempT = curTime - AInfoList[name].eatToBuffTime;
 					AInfoList[name].eatToBuffTime = tempT
 					AInfoList[name].flag = 2 --吃出了buff阶段
-					print(name..">>吃出buff时间异常，耗时"..string_format("%.1f", tempT).."秒; ") -- W
+					if DEBUG_MORE then print(name.."吃出buff时间，耗时"..string_format("%.1f", tempT).."秒; ") end-- W
 					if (tempT < (EAT_TO_BUFF_TIME - 0.2)) or (tempT > (EAT_TO_BUFF_TIME + 0.2)) then
 						print(name..">>吃出buff时间异常，耗时"..string_format("%.1f", tempT).."秒; ") -- W
 					end
 				elseif AInfoList[name].flag == 2 then
-					--print(name.."吃出buff，继续吃BUFF剩余时间"..string_format("%.0f", leftEatTime).."秒; ") -- debug
 					--print(name.."吃出了buff，保存剩余"..AInfoList[name].lastEatDaoTime.." 现在剩余"..leftEatTime)
 					if leftEatTime > AInfoList[name].lastEatDaoTime then
 						print(name..">>吃出了BUFF以后，又TM吃了1次。") --W
@@ -169,7 +172,7 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 			if totalt > EAT_MAX_TIME + 0.3 then
 				print(name..">>停止进食超时毒瘤！耗时"..string_format("%.1f", totalt).."秒;") --W
 			else
-				-- print(name.."停止进食, 耗时"..string_format("%.1f", totalt).."秒;") --W
+				if DEBUG_MORE then print(name.."停止进食, 耗时"..string_format("%.1f", totalt).."秒;") end--W
 			end
 			AInfoList[name] = nil
 		elseif hasEating == false and hasFood == false then
@@ -186,10 +189,9 @@ local function trim(s) return (string.gsub(s, "^%s*(.-)%s*$", "%1"))end
 
 function SlashCmdList.BigFoodDuliu(msg)
 	if msg == "" or msg == "HELP" or msg == "help" then
+		print(">>>>大餐毒瘤插件")
 		print("请输入/bfd enable开启, /bfd disable关闭")
 		print("当前启用状态是: "..tostring(BFD_Enable))
-	elseif msg == "show" then
-	elseif msg == "clear" then
 	elseif msg == "enable" then
 		print("bfd 开启")
 		BFD_Enable = true
