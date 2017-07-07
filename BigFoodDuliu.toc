@@ -3,14 +3,11 @@
 ## Title-zhTW: 大餐毒瘤。找出團隊吃大餐的時候，點擊過多的毒瘤玩家。
 ## Title-zhCN: 大餐毒瘤。找出团队吃大餐的时候，点击过多的毒瘤选手。
 ## Author: Allan
-## Version: 7.2.5.20170703
+## Version: 7.2.5.20170707
 ## Notes: BigFoodDuliu  when enter combat, it will disable self temporary. /bfd
 ## Notes-zhTW: 大餐毒瘤插件。進入戰鬥會自動臨時禁用，節約內存。 /bfd
 ## Notes-zhCN: 大餐毒瘤插件 进入战斗会自动临时禁用，节约内存。 /bfd
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: BFD_Enable
-localization-zhCN.lua
-localization-enUS.lua
-localization-zhTW.lua
 BigFoodDuliu.lua
