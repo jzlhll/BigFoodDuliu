@@ -15,23 +15,28 @@ local EAT_TO_BUFF_TIME = 10  --- 食物吃出buff需要的时间 秒
 
 local RE_EAT_BUFF_TIME = 55 --- 食物BUFF大于这个分钟，就表示吃了还TM吃;小于这个认为他可以吃
 
-local FOOD_EAT_ID = 192002 --大餐吃的ID --法罗纳尔气泡酒的225743
+local FOOD_EAT_ID = 192002 --大餐吃的ID
 
--- 食物buFF的ID，由于大餐有4个职业的bUFF，所以预留4个
--- 备注的是大餐的4个职业的BUFF ID 法罗纳尔气泡酒的ID201334 -- 
-local FOOD_BUF_ID0 = 201638
-local FOOD_BUF_ID1 = 201641
-local FOOD_BUF_ID2 = 201639
-local FOOD_BUF_ID3 = 201640
-local FOOD_BUF_ID_SELF1 = 225602 -- 暴击自己食物
-local FOOD_BUF_ID_SELF2 = 225604 -- 精通自己食物
-local FOOD_BUF_ID_SELF3 = 225603 -- 极速自己食物
-local FOOD_BUF_ID_SELF4 = 225605  -- 全能自己食物
-local FOOD_BUF_ID_SELF5 = 201695  -- 斗士食物
-------end 
+-- 大餐buFF IDs
+local BIG_FOOD_BUFF_IDS = {
+	["STRENGTH"] = 201638, --力量
+	["STAMINA"] = 201639, --耐力
+	["INTELLECT"] = 201640, --智力
+	["AGILITY"] = 201641 --敏捷
+}
+-- 个人食物BUFF IDS. 如果FOOD_EAT_ID一致, BUFF不一致,就得追加
+local SELF_FOOD_BUFF_IDS = {
+	["CRITICAL"] = 225602, --  暴击食物
+	["MASTERY"] = 225604, --  精通食物
+	["VERSATILITY"] = 225605, --  全能食物
+	["HASTE"] = 225603, -- 急速食物
+	["FIGHT"] = 201695, -- 斗士食物
+}
+------end
+
 --[[
-----参数配置-----
-local DEBUG_MORE = false
+----参数配置 DEBUG-----
+local DEBUG_MORE = true
 local DEBUG_MORE2 = false
 
 local EAT_MAX_TIME = 20 --- 食物倒计时最大 秒
@@ -40,21 +45,25 @@ local EAT_TO_BUFF_TIME = 10  --- 食物吃出buff需要的时间 秒
 
 local RE_EAT_BUFF_TIME = 55 --- 食物BUFF大于这个分钟，就表示吃了还TM吃;小于这个认为他可以吃
 
-local FOOD_EAT_ID = 225743 --大餐吃的ID --法罗纳尔气泡酒的225743
+local FOOD_EAT_ID = 225743 --法罗纳尔气泡酒的 225743
 
--- 食物buFF的ID，由于大餐有4个职业的bUFF，所以预留4个
--- 备注的是大餐的4个职业的BUFF ID 当前是法罗纳尔气泡酒的ID 201334 -- 
-local FOOD_BUF_ID0 = 201638
-local FOOD_BUF_ID1 = 201641
-local FOOD_BUF_ID2 = 201639
-local FOOD_BUF_ID3 = 201640
-local FOOD_BUF_ID_SELF1 = 201334 -- 暴击自己食物
-local FOOD_BUF_ID_SELF2 = 201334 -- 精通自己食物
-local FOOD_BUF_ID_SELF3 = 201334 -- 极速自己食物
-local FOOD_BUF_ID_SELF4 = 201334  -- 全能自己食物
-local FOOD_BUF_ID_SELF5 = 201334  -- 斗士食物
-------end
+-- 当前是法罗纳尔气泡酒的ID 201334 -- 
+local BIG_FOOD_BUFF_IDS = {
+	["STRENGTH"] = 201334, --力量
+	["STAMINA"] = 201334, --耐力
+	["INTELLECT"] = 201334, --智力
+	["AGILITY"] = 201334 --敏捷
+}
+
+local SELF_FOOD_BUFF_IDS = {
+	["CRITICAL"] = 225602, --  暴击食物
+	["MASTERY"] = 225604, --  精通食物
+	["VERSATILITY"] = 225605, --  全能食物
+	["HASTE"] = 225603, -- 急速食物
+	["FIGHT"] = 201695, -- 斗士食物
+}
 --]]
+------end
 
 local EAT_ALMOST_MAX = 3540
 
@@ -64,11 +73,11 @@ local string_format = string.format
 local InfoList
 
 local function isSpellEqual(sid)
-	if sid == FOOD_BUF_ID0 or sid == FOOD_BUF_ID1 or sid == FOOD_BUF_ID2 or sid == FOOD_BUF_ID3 then
-		return 1
+	for k, v in pairs(BIG_FOOD_BUFF_IDS) do
+		if v == sid then return 1 end
 	end
-	if sid == FOOD_BUF_ID_SELF1 or sid == FOOD_BUF_ID_SELF2 or sid == FOOD_BUF_ID_SELF3 or sid == FOOD_BUF_ID_SELF4  or sid == FOOD_BUF_ID_SELF5 then
-		return 2
+	for k, v in pairs(SELF_FOOD_BUFF_IDS) do
+		if v == sid then return 2 end
 	end
 	return 0
 end
@@ -78,7 +87,7 @@ local function registerMyEvents(event, ...)
 	if BFD_Enable == nil then
 		BFD_Enable = true
     end
-
+	
 	InfoList = {}
 	if BFD_Enable == true then
 		BigFoodDuliu:RegisterEvent("PLAYER_REGEN_ENABLED")
@@ -114,7 +123,7 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 	if unitid == nil then return end
 	local name = GetUnitName(unitid)
 	if InfoList[name] then
-		if curTime <= InfoList[name].timeStamp then
+		if curTime <= InfoList[name].timeStamp + 0.01 then
 			if DEBUG_MORE2 then print(name.."刷新太快减少计算return") end
 			return
 		end
@@ -132,7 +141,6 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 				hasEating = true
 				leftEatTime = expirationTime - curTime
 				if buffType > 0 then break end
-			-- elseif isSpellEqual(spellID) then
 			else
 				buffType = isSpellEqual(spellID)
 				if buffType > 0 then
@@ -142,8 +150,8 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 			end
 		end
 	end
-	-- if DEBUG_MORE2 then print(name..",Buff "..(buffType).." Eating "..tostring(hasEating).." bufleft " ..string_format("%.0f", leftBufTime).." eatTime "..string_format("%.1f", leftEatTime)) end
-	-- if DEBUG_MORE2 then print("curTime "..curTime) end
+	if DEBUG_MORE2 then print(name..",Buff "..(buffType).." Eating "..tostring(hasEating).." bufleft " ..string_format("%.0f", leftBufTime).." eatTime "..string_format("%.1f", leftEatTime)) end
+	if DEBUG_MORE2 then print("curTime "..curTime) end
 	if InfoList[name] == nil then
 		if hasEating == true then
 			--刚进入进食的状态,
@@ -158,7 +166,7 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 				timeStamp=curTime,
 				}
 			end
-			
+
 			if buffType > 0 then
 				InfoList[name].buffLeftTime = leftBufTime
 				if (leftBufTime/60) >= RE_EAT_BUFF_TIME then
@@ -252,6 +260,12 @@ function SlashCmdList.BigFoodDuliu(msg)
 	elseif msg == "disable" then
 		print("bfd 关闭")
 		BFD_Enable = false
+		BigFoodDuliu:UnregisterEvent("UNIT_AURA")
+	elseif msg == "maid_enable" then
+		BFD_Maid_Enable = true
+		BigFoodDuliu:RegisterEvent("UNIT_AURA")
+	elseif msg == "maid_disable" then
+		BFD_Maid_Enable = false
 		BigFoodDuliu:UnregisterEvent("UNIT_AURA")
 	end
 end

@@ -9,7 +9,7 @@
 ## Notes-zhCN: 大餐毒瘤插件 进入战斗会自动临时禁用，节约内存。 /bfd
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
-## SavedVariables: BFD_Enable
+## SavedVariables: BFD_Enable, BFD_Maid_Enable
 localization-zhCN.lua
 localization-enUS.lua
 localization-zhTW.lua
