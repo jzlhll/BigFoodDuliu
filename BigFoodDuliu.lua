@@ -261,11 +261,5 @@ function SlashCmdList.BigFoodDuliu(msg)
 		print("bfd 关闭")
 		BFD_Enable = false
 		BigFoodDuliu:UnregisterEvent("UNIT_AURA")
-	elseif msg == "maid_enable" then
-		BFD_Maid_Enable = true
-		BigFoodDuliu:RegisterEvent("UNIT_AURA")
-	elseif msg == "maid_disable" then
-		BFD_Maid_Enable = false
-		BigFoodDuliu:UnregisterEvent("UNIT_AURA")
 	end
 end
