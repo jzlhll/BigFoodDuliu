@@ -18,20 +18,16 @@ local RE_EAT_BUFF_TIME = 55 --- 食物BUFF大于这个分钟，就表示吃了�
 local FOOD_EAT_ID = 192002 --大餐吃的ID
 
 -- 大餐buFF IDs
-local BIG_FOOD_BUFF_IDS = {
-	["STRENGTH"] = 201638, --力量
-	["STAMINA"] = 201639, --耐力
-	["INTELLECT"] = 201640, --智力
-	["AGILITY"] = 201641 --敏捷
-}
+local FOOD_BUF_ID0 = 201638
+local FOOD_BUF_ID1 = 201641
+local FOOD_BUF_ID2 = 201639
+local FOOD_BUF_ID3 = 201640
 -- 个人食物BUFF IDS. 如果FOOD_EAT_ID一致, BUFF不一致,就得追加
-local SELF_FOOD_BUFF_IDS = {
-	["CRITICAL"] = 225602, --  暴击食物
-	["MASTERY"] = 225604, --  精通食物
-	["VERSATILITY"] = 225605, --  全能食物
-	["HASTE"] = 225603, -- 急速食物
-	["FIGHT"] = 201695, -- 斗士食物
-}
+local SELF_BUF_ID0 = 225602
+local SELF_BUF_ID1 = 225604
+local SELF_BUF_ID2 = 225605
+local SELF_BUF_ID3 = 225603
+local SELF_BUF_ID4 = 201695
 ------end
 
 --[[
@@ -73,11 +69,11 @@ local string_format = string.format
 local InfoList
 
 local function isSpellEqual(sid)
-	for k, v in pairs(BIG_FOOD_BUFF_IDS) do
-		if v == sid then return 1 end
+	if FOOD_BUF_ID0 == sid or FOOD_BUF_ID1 == sid or FOOD_BUF_ID2 == sid or FOOD_BUF_ID3 == sid then
+		return 1
 	end
-	for k, v in pairs(SELF_FOOD_BUFF_IDS) do
-		if v == sid then return 2 end
+	if SELF_BUF_ID0 == sid or SELF_BUF_ID1 == sid or SELF_BUF_ID2 == sid or SELF_BUF_ID3 == sid or SELF_BUF_ID4 == sid then
+		return 2
 	end
 	return 0
 end
@@ -124,7 +120,7 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 	local name = GetUnitName(unitid)
 	if InfoList[name] then
 		if curTime <= InfoList[name].timeStamp + 0.01 then
-			if DEBUG_MORE2 then print(name.."刷新太快减少计算return") end
+			-- if DEBUG_MORE2 then print(name.."刷新太快减少计算return") end
 			return
 		end
 		InfoList[name].timeStamp = curTime
@@ -137,21 +133,23 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 	for j=1,40 do
 		local _, _, _, _, _, _, expirationTime, _, _, _, spellID = UnitBuff(unitid, j)
 		if expirationTime then
-			if spellID == FOOD_EAT_ID then
+			if spellID == FOOD_EAT_ID and hasEating == false then
 				hasEating = true
 				leftEatTime = expirationTime - curTime
-				if buffType > 0 then break end
-			else
+			end
+			if buffType == 0 then
 				buffType = isSpellEqual(spellID)
 				if buffType > 0 then
 					leftBufTime = expirationTime - curTime
-					if hasEating == true then break end
 				end
+			end
+			if hasEating == true and buffType > 0 then
+				break
 			end
 		end
 	end
-	if DEBUG_MORE2 then print(name..",Buff "..(buffType).." Eating "..tostring(hasEating).." bufleft " ..string_format("%.0f", leftBufTime).." eatTime "..string_format("%.1f", leftEatTime)) end
-	if DEBUG_MORE2 then print("curTime "..curTime) end
+	--if DEBUG_MORE2 then print(name..",Buff "..(buffType).." Eating "..tostring(hasEating).." bufleft " ..string_format("%.0f", leftBufTime).." eatTime "..string_format("%.1f", leftEatTime)) end
+	--if DEBUG_MORE2 then print("curTime "..curTime) end
 	if InfoList[name] == nil then
 		if hasEating == true then
 			--刚进入进食的状态,
@@ -163,12 +161,13 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 			buffLeftTime=0,
 			eatCount=0,
 			timeStamp=curTime,
+			buffType = 0,
 			}
 			if buffType > 0 then
 				InfoList[name].buffLeftTime = leftBufTime
 				if (leftBufTime/60) >= RE_EAT_BUFF_TIME then
 					local str = ">毒瘤>有大餐buff"
-					if buffType == 2 then str = "有自带食物buff"
+					if buffType == 2 then str = "有自带食物buff" end
 					print(name..str..string_format("%.0f", (leftBufTime/60)).."分钟还吃！") --W
 				end
 			else
@@ -185,6 +184,7 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 		end
 	else -- 说明已经开始吃这个动作已经做了，这次是在更新
 		if hasEating == true and buffType > 0 then
+			InfoList[name].buffType = buffType
 			-- 在进食, 而有食物buff 应该是吃出buff了或者之前就是有了的
 			if buffType == 1 then
 				--print(name.."上次就有BUFF，保存剩余"..InfoList[name].lastEatDaoTime.." 现在剩余"..leftEatTime)
@@ -206,11 +206,12 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 			--print(name.."正在进食，no BUFF"..InfoList[name].lastEatDaoTime.." 现在剩余"..leftEatTime)
 			if leftEatTime > InfoList[name].lastEatDaoTime then
 				InfoList[name].eatCount = InfoList[name].eatCount + 1
-				print(name..">毒瘤>还没吃出BUFF又吃，共计"..InfoList[name].eatCount.."次") --W
-				print("     (无法区分自带食物还是大餐)")
+				if DEBUG_MORE then print(name..">毒瘤>还没吃出BUFF又吃，共计"..InfoList[name].eatCount.."次") end--W
+				if DEBUG_MORE then print("     (暂时无法区分") end
 			end
 			InfoList[name].lastEatDaoTime = leftEatTime
 		elseif hasEating == false and buffType > 0 then
+			InfoList[name].buffType = buffType
 			--- 已经吃完 (或者 已经有buff,没吃这种情况，由于没吃就不会有Info，就不会到这里来，所以只有已经吃完的情况)
 			local totalt = curTime - InfoList[name].totalTime;
 			--InfoList[name].totalTime = totalt
@@ -260,5 +261,7 @@ function SlashCmdList.BigFoodDuliu(msg)
 		print("bfd 关闭")
 		BFD_Enable = false
 		BigFoodDuliu:UnregisterEvent("UNIT_AURA")
+	elseif msg == "test" then
+		local s = isSpellEqual(201638)
 	end
 end
