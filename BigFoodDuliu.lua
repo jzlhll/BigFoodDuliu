@@ -30,6 +30,10 @@ local SELF_BUF_ID3 = 225603
 local SELF_BUF_ID4 = 201695
 ------end
 
+local function myPrint(s)
+	--SendChatMessage(s, "RAID")
+	print(s)
+end
 --[[
 ----参数配置 DEBUG-----
 local DEBUG_MORE = true
@@ -168,7 +172,7 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 				if (leftBufTime/60) >= RE_EAT_BUFF_TIME then
 					local str = ">毒瘤>有大餐buff"
 					if buffType == 2 then str = "有自带食物buff" end
-					print(name..str..string_format("%.0f", (leftBufTime/60)).."分钟还吃！") --W
+					myPrint(name..str..string_format("%.0f", (leftBufTime/60)).."分钟还吃！") --W
 				end
 			else
 				if DEBUG_MORE2 then print(name.."开始吃") end
@@ -190,14 +194,14 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 				--print(name.."上次就有BUFF，保存剩余"..InfoList[name].lastEatDaoTime.." 现在剩余"..leftEatTime)
 				if leftEatTime > InfoList[name].lastEatDaoTime then
 					InfoList[name].eatCount = InfoList[name].eatCount + 1
-					print(name..">>毒瘤有大餐buff TMD又吃，总计"..InfoList[name].eatCount.."次") --W
+					myPrint(name..">>毒瘤有大餐buff TMD又吃，总计"..InfoList[name].eatCount.."次") --W
 				end
 				InfoList[name].lastEatDaoTime = leftEatTime
 			elseif buffType == 2 then
 				--print(name.."上次就有BUFF，保存剩余"..InfoList[name].lastEatDaoTime.." 现在剩余"..leftEatTime)
 				if leftEatTime > InfoList[name].lastEatDaoTime then
 					InfoList[name].eatCount = InfoList[name].eatCount + 1
-					print(name..">>坑自己,有自带食物buff 又吃，总计"..InfoList[name].eatCount.."次") --W
+					myPrint(name..">>坑自己,有自带食物buff 又吃，总计"..InfoList[name].eatCount.."次") --W
 				end
 				InfoList[name].lastEatDaoTime = leftEatTime
 			end
@@ -218,15 +222,15 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 			-- InfoList[name].buffLeftTime = leftBufTime
 			if totalt > EAT_MAX_TIME + 0.1 then
 				if buffType == 1 then
-					print(name..">毒瘤>停止进食大餐超时！耗时"..string_format("%.1f", totalt).."秒") --W
+					myPrint(name..">毒瘤>停止进食大餐超时！耗时"..string_format("%.1f", totalt).."秒") --W
 				elseif buffType == 2 then
-					print(name.."坑自己，停止吃自带食物超时！耗时"..string_format("%.1f", totalt).."秒") --W
+					myPrint(name.."坑自己，停止吃自带食物超时！耗时"..string_format("%.1f", totalt).."秒") --W
 				end
 			elseif totalt < EAT_TO_BUFF_TIME - 0.1 and leftBufTime < EAT_ALMOST_MAX then
 				if buffType == 1 then
-					print(name..">毒瘤>停止进食大餐, 耗时"..string_format("%.1f", totalt).."秒过短，buff没刷新。")
+					myPrint(name..">毒瘤>停止进食大餐, 耗时"..string_format("%.1f", totalt).."秒过短，buff没刷新。")
 				elseif buffType == 2 then
-					print(name.."坑自己，停止吃自带食物, 耗时"..string_format("%.1f", totalt).."秒过短，buff没刷新。")
+					myPrint(name.."坑自己，停止吃自带食物, 耗时"..string_format("%.1f", totalt).."秒过短，buff没刷新。")
 				end
 			else
 				if DEBUG_MORE then print(name.."停止进食，耗时"..string_format("%.1f", totalt).."秒") end
@@ -241,8 +245,8 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 			---没吃出BUFF停止了。（或者没吃没buff的状态。跟上面一下，有Info的情况只会是从有状态进入的不会进来的。所以是没吃出BUFF停止了。）
 			local totalt = curTime - InfoList[name].totalTime;
 			-- InfoList[name].totalTime = totalt
-			print(name..">毒瘤>没吃出buff！耗时"..string_format("%.1f", totalt).."秒") --W
-			print("     (无法区分吃的自带食物还是大餐)")
+			myPrint(name..">毒瘤>没吃出buff！耗时"..string_format("%.1f", totalt).."秒") --W
+			myPrint("     (还无法区分吃的自带食物还是大餐)")
 			InfoList[name] = nil
 		end
 	end
@@ -261,7 +265,6 @@ function SlashCmdList.BigFoodDuliu(msg)
 		print("bfd 关闭")
 		BFD_Enable = false
 		BigFoodDuliu:UnregisterEvent("UNIT_AURA")
-	elseif msg == "test" then
-		local s = isSpellEqual(201638)
 	end
 end
+
