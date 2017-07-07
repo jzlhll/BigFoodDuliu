@@ -155,22 +155,21 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 	if InfoList[name] == nil then
 		if hasEating == true then
 			--刚进入进食的状态,
-			if InfoList[name] == nil then
-				InfoList[name] = {
-				flag=0,
-				eatToBuffTime=0,
-				totalTime=0,
-				lastEatDaoTime=0,
-				buffLeftTime=0,
-				eatCount=0,
-				timeStamp=curTime,
-				}
-			end
-
+			InfoList[name] = {
+			flag=0,
+			eatToBuffTime=0,
+			totalTime=0,
+			lastEatDaoTime=0,
+			buffLeftTime=0,
+			eatCount=0,
+			timeStamp=curTime,
+			}
 			if buffType > 0 then
 				InfoList[name].buffLeftTime = leftBufTime
 				if (leftBufTime/60) >= RE_EAT_BUFF_TIME then
-					print(name..(">毒瘤>有BUFF").. string_format("%.0f", (leftBufTime/60)).."分钟还吃！") --W
+					local str = ">毒瘤>有大餐buff"
+					if buffType == 2 then str = "有自带食物buff"
+					print(name..str..string_format("%.0f", (leftBufTime/60)).."分钟还吃！") --W
 				end
 			else
 				if DEBUG_MORE2 then print(name.."开始吃") end
@@ -198,7 +197,7 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 				--print(name.."上次就有BUFF，保存剩余"..InfoList[name].lastEatDaoTime.." 现在剩余"..leftEatTime)
 				if leftEatTime > InfoList[name].lastEatDaoTime then
 					InfoList[name].eatCount = InfoList[name].eatCount + 1
-					print(name..">>坑自己,有属性buff 又吃，总计"..InfoList[name].eatCount.."次") --W
+					print(name..">>坑自己,有自带食物buff 又吃，总计"..InfoList[name].eatCount.."次") --W
 				end
 				InfoList[name].lastEatDaoTime = leftEatTime
 			end
@@ -208,7 +207,7 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 			if leftEatTime > InfoList[name].lastEatDaoTime then
 				InfoList[name].eatCount = InfoList[name].eatCount + 1
 				print(name..">毒瘤>还没吃出BUFF又吃，共计"..InfoList[name].eatCount.."次") --W
-				print("   (无法区分吃的自带食物还是大餐)")
+				print("     (无法区分自带食物还是大餐)")
 			end
 			InfoList[name].lastEatDaoTime = leftEatTime
 		elseif hasEating == false and buffType > 0 then
@@ -242,7 +241,7 @@ function BigFoodDuliu:UNIT_AURA(self, ...)
 			local totalt = curTime - InfoList[name].totalTime;
 			-- InfoList[name].totalTime = totalt
 			print(name..">毒瘤>没吃出buff！耗时"..string_format("%.1f", totalt).."秒") --W
-			print("   (无法区分吃的自带食物还是大餐)")
+			print("     (无法区分吃的自带食物还是大餐)")
 			InfoList[name] = nil
 		end
 	end
